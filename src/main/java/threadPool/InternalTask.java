@@ -11,10 +11,13 @@ public class InternalTask implements Runnable {
 
   private volatile boolean running = true;
 
-  public InternalTask(Queue queue) {
+  InternalTask(Queue queue) {
     this.queue = queue;
   }
 
+  /**
+   * 取
+   */
   @Override
   public void run() {
     while (running && !Thread.currentThread().isInterrupted()) {
