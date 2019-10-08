@@ -2,6 +2,7 @@ package threadPool;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Created by TOM
@@ -15,7 +16,7 @@ public class testThread implements Runnable {
   }
 
   public static void main(String[] args) {
-    BaseThreadPoolImpl baseThreadPool = new BaseThreadPoolImpl(5, 10);
+    TomThreadPool baseThreadPool = new TomThreadPool(5, 10);
     ExecutorService executorService = Executors.newFixedThreadPool(1);
     for (int i = 0; i < 11; i++) {
 /*      executorService.execute(() -> {
@@ -27,7 +28,7 @@ public class testThread implements Runnable {
           System.out.println(Thread.currentThread().getName() + Thread.currentThread().getId());
           System.out.println("ddddd");
         } catch (Exception e) {
-          System.out.println("----");
+          System.out.println(ExceptionUtils.getStackTrace(e));
         }
       });
     }

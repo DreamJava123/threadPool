@@ -15,20 +15,17 @@ public class LinkedQueue implements Queue {
 
 
   private final LinkedList<Runnable> runnableLinkedList = new LinkedList<>();
-  //???
-  private final BaseThreadPool baseThreadPool;
 
-  public LinkedQueue(int limit, DenyPolicy denyPolicy, BaseThreadPool baseThreadPool) {
+  LinkedQueue(int limit, DenyPolicy denyPolicy) {
     this.limit = limit;
     this.denyPolicy = denyPolicy;
-    this.baseThreadPool = baseThreadPool;
   }
 
   @Override
   public void offer(Runnable runnable) {
     synchronized (runnableLinkedList) {
       if (runnableLinkedList.size() >= limit) {
-        //超过限制，启动拒绝策略
+        //todo 超过限制，启动拒绝策略
         System.out.println("被拒绝啦");
       } else {
         //将入到队列

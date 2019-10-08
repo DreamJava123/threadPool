@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
  * Created by TOM
  * On 2019/10/7 17:52
  */
-public class BaseThreadPoolImpl implements BaseThreadPool {
+public class TomThreadPool implements BaseThreadPool {
 
   private final int coreNum;
 
@@ -26,24 +26,24 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
   private final long keepAliveTime;
 
   private final TimeUnit timeUnit;
-
+  //用于维护
   private LinkedBlockingQueue<InternalTask> aliveThreadQueue = new LinkedBlockingQueue<>();
   // private final static DenyPolicy DENY_POLICY
 
   private final static ThreadFactory DEFAULT_THREAD_FACTORY = new DefaultThreadFactory();
 
-  public BaseThreadPoolImpl(int coreNum, int maxNum) {
+  public TomThreadPool(int coreNum, int maxNum) {
     this.coreNum = coreNum;
     this.maxNum = maxNum;
     this.threadFactory = new DefaultThreadFactory();
     this.denyPolicy = null;
     this.keepAliveTime = 0L;
     this.timeUnit = TimeUnit.MILLISECONDS;
-    this.queue = new LinkedQueue(maxNum, null, this);
+    this.queue = new LinkedQueue(maxNum, null);
     this.init();
   }
 
-  public BaseThreadPoolImpl(int coreNum, int maxNum, ThreadFactory threadFactory, DenyPolicy denyPolicy, long keepAliveTime,
+  public TomThreadPool(int coreNum, int maxNum, ThreadFactory threadFactory, DenyPolicy denyPolicy, long keepAliveTime,
       TimeUnit timeUnit) {
     this.coreNum = coreNum;
     this.maxNum = maxNum;
@@ -54,7 +54,7 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
     this.init();
   }
 
-  public BaseThreadPoolImpl(int coreNum, int maxNum, int aliveNum, ThreadFactory threadFactory,
+  public TomThreadPool(int coreNum, int maxNum, int aliveNum, ThreadFactory threadFactory,
       DenyPolicy denyPolicy, Queue queue, boolean isShutDown, long keepAliveTime, TimeUnit timeUnit) {
     this.coreNum = coreNum;
     this.maxNum = maxNum;
@@ -79,9 +79,9 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
 
   private static class ThreadPoolManager extends Thread {
 
-    private final BaseThreadPoolImpl baseThreadPool;
+    private final TomThreadPool baseThreadPool;
 
-    ThreadPoolManager(BaseThreadPoolImpl baseThreadPool) {
+    ThreadPoolManager(TomThreadPool baseThreadPool) {
       this.baseThreadPool = baseThreadPool;
     }
 
@@ -89,6 +89,7 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
     public void run() {
       while (!baseThreadPool.isShutdown() && !isInterrupted()) {
         try {
+          //间隔运行
           baseThreadPool.timeUnit.sleep(baseThreadPool.keepAliveTime);
         } catch (InterruptedException e) {
           e.printStackTrace();
