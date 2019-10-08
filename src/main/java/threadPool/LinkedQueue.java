@@ -1,6 +1,7 @@
 package threadPool;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedList;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Created by TOM
@@ -12,7 +13,8 @@ public class LinkedQueue implements Queue {
 
   private final DenyPolicy denyPolicy;
 
-  private final LinkedBlockingQueue<Runnable> runnableLinkedList = new LinkedBlockingQueue<>();
+
+  private final LinkedList<Runnable> runnableLinkedList = new LinkedList<>();
   //???
   private final BaseThreadPool baseThreadPool;
 
@@ -24,26 +26,33 @@ public class LinkedQueue implements Queue {
 
   @Override
   public void offer(Runnable runnable) {
-    if (runnableLinkedList.size() <= limit) {
-      runnableLinkedList.offer(runnable);
-      runnableLinkedList.notifyAll();
-    } else {
-      denyPolicy.reject();
+    synchronized (runnableLinkedList) {
+      if (runnableLinkedList.size() >= limit) {
+        //超过限制，启动拒绝策略
+        System.out.println("被拒绝啦");
+      } else {
+        //将入到队列
+        runnableLinkedList.addLast(runnable);
+        runnableLinkedList.notifyAll();
+      }
     }
+
   }
 
   @Override
   public Runnable take() {
     while (runnableLinkedList.isEmpty()) {
-      try {
-        //挂起当前线程
-        runnableLinkedList.wait();
-      } catch (InterruptedException e) {
-        System.out.println(e);
+      synchronized (runnableLinkedList) {
+        try {
+          //挂起当前线程
+          runnableLinkedList.wait();
+        } catch (InterruptedException e) {
+          System.out.println(ExceptionUtils.getStackTrace(e));
+        }
       }
     }
     //拿到第一个
-    return runnableLinkedList.remove();
+    return runnableLinkedList.getFirst();
   }
 
   @Override

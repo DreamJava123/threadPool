@@ -27,7 +27,7 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
 
   private final TimeUnit timeUnit;
 
-  private LinkedBlockingQueue<ThreadTask> aliveThreadQueue = new LinkedBlockingQueue<>();
+  private LinkedBlockingQueue<InternalTask> aliveThreadQueue = new LinkedBlockingQueue<>();
   // private final static DenyPolicy DENY_POLICY
 
   private final static ThreadFactory DEFAULT_THREAD_FACTORY = new DefaultThreadFactory();
@@ -39,6 +39,7 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
     this.denyPolicy = null;
     this.keepAliveTime = 0L;
     this.timeUnit = TimeUnit.MILLISECONDS;
+    this.queue = new LinkedQueue(maxNum, null, this);
     this.init();
   }
 
@@ -68,18 +69,19 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
   }
 
   private void init() {
-    InterThreadPool interThreadPool = new InterThreadPool(this);
-    interThreadPool.start();
+    //类似守护线程
+    ThreadPoolManager threadPoolManager = new ThreadPoolManager(this);
+    threadPoolManager.start();
     for (int i = 0; i < coreNum; i++) {
       creatThread();
     }
   }
 
-  private static class InterThreadPool extends Thread {
+  private static class ThreadPoolManager extends Thread {
 
     private final BaseThreadPoolImpl baseThreadPool;
 
-    public InterThreadPool(BaseThreadPoolImpl baseThreadPool) {
+    ThreadPoolManager(BaseThreadPoolImpl baseThreadPool) {
       this.baseThreadPool = baseThreadPool;
     }
 
@@ -91,19 +93,10 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
-
+        synchronized (this) {
+          //todo
+        }
       }
-    }
-  }
-
-  private static class ThreadTask {
-
-    private final InternalTask internalTask;
-    private final Thread thread;
-
-    ThreadTask(InternalTask internalTask, Thread thread) {
-      this.internalTask = internalTask;
-      this.thread = thread;
     }
   }
 
@@ -112,7 +105,7 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
     if (this.isShutdown()) {
       throw new IllegalStateException("thread is shutDown");
     }
-    queue.offer(runnable);
+    this.queue.offer(runnable);
   }
 
   /**
@@ -121,15 +114,14 @@ public class BaseThreadPoolImpl implements BaseThreadPool {
   private void creatThread() {
     InternalTask internalTask = new InternalTask(this.queue);
     Thread thread = this.threadFactory.creatThread(internalTask);
-    ThreadTask threadTask = new ThreadTask(internalTask, thread);
-    aliveThreadQueue.offer(threadTask);
+    aliveThreadQueue.offer(internalTask);
     thread.start();
     aliveNum++;
   }
 
   private void closeThread() {
-    ThreadTask remove = aliveThreadQueue.remove();
-    remove.internalTask.stop();
+    InternalTask remove = aliveThreadQueue.remove();
+    remove.stop();
     aliveNum--;
   }
 

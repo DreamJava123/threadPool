@@ -1,6 +1,8 @@
 package threadPool;
 
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 /**
  * Created by TOM
  * On 2019/10/7 16:13
@@ -25,7 +27,7 @@ public class InternalTask implements Runnable {
         Runnable take = queue.take();
         take.run();
       } catch (Exception e) {
-        System.out.println(e);
+        System.out.println(ExceptionUtils.getStackTrace(e));
         running = false;
         break;
       }
