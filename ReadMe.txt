@@ -1,15 +1,2 @@
-Camel Java Router Project
-=========================
-
-To build this project use
-
-    mvn install
-
-To run this project from within Maven use
-
-    mvn exec:java
-
-For more help see the Apache Camel documentation
-
-    http://camel.apache.org/
-
+模拟线程池 完成基本功能
+还差 拒绝策略 没有做 还有一个就是 还差内部维护没有做
