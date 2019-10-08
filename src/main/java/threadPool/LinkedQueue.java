@@ -38,8 +38,8 @@ public class LinkedQueue implements Queue {
 
   @Override
   public Runnable take() {
-    while (runnableLinkedList.isEmpty()) {
-      synchronized (runnableLinkedList) {
+    synchronized (runnableLinkedList) {
+      while (runnableLinkedList.isEmpty()) {
         try {
           //挂起当前线程
           runnableLinkedList.wait();
@@ -49,7 +49,7 @@ public class LinkedQueue implements Queue {
       }
     }
     //拿到第一个
-    return runnableLinkedList.getFirst();
+    return runnableLinkedList.removeFirst();
   }
 
   @Override

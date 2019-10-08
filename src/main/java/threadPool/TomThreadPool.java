@@ -2,6 +2,7 @@ package threadPool;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Created by TOM
@@ -10,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class TomThreadPool implements BaseThreadPool {
 
   private final int coreNum;
-
+  //同步操作数
   private final int maxNum;
 
   private int aliveNum;
@@ -92,10 +93,20 @@ public class TomThreadPool implements BaseThreadPool {
           //间隔运行
           baseThreadPool.timeUnit.sleep(baseThreadPool.keepAliveTime);
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          System.out.println(ExceptionUtils.getStackTrace(e));
         }
         synchronized (this) {
-          //todo
+          if (baseThreadPool.queue.size() == baseThreadPool.maxNum && baseThreadPool.aliveNum < baseThreadPool.maxNum) {
+            //说明满了 增加线程
+            for (int i = 0; i < baseThreadPool.maxNum - baseThreadPool.coreNum; i++) {
+              baseThreadPool.creatThread();
+            }
+          }
+          if (baseThreadPool.queue.size() == 0 && baseThreadPool.aliveNum > baseThreadPool.coreNum) {
+            for (int i = 0; i < baseThreadPool.aliveNum - baseThreadPool.coreNum; i++) {
+              baseThreadPool.closeThread();
+            }
+          }
         }
       }
     }
@@ -128,27 +139,31 @@ public class TomThreadPool implements BaseThreadPool {
 
   @Override
   public void shutdown() {
-
+    int desNum = aliveNum;
+    for (int i = 0; i < desNum; i++) {
+      closeThread();
+    }
+    isShutDown = true;
   }
 
   @Override
   public int getMaxSize() {
-    return 0;
+    return maxNum;
   }
 
   @Override
   public int getCoreSize() {
-    return 0;
+    return coreNum;
   }
 
   @Override
   public int getQueueSize() {
-    return 0;
+    return queue.size();
   }
 
   @Override
   public int getAliveSize() {
-    return 0;
+    return aliveNum;
   }
 
   @Override

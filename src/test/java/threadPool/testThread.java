@@ -18,19 +18,30 @@ public class testThread implements Runnable {
   public static void main(String[] args) {
     TomThreadPool baseThreadPool = new TomThreadPool(5, 10);
     ExecutorService executorService = Executors.newFixedThreadPool(1);
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 2000; i++) {
 /*      executorService.execute(() -> {
         System.out.println(Thread.currentThread().getName());
         System.out.println("ddddd");
       });*/
+      System.out.println("start" + baseThreadPool.getAliveSize());
       baseThreadPool.execute(() -> {
         try {
           System.out.println(Thread.currentThread().getName() + Thread.currentThread().getId());
-          System.out.println("ddddd");
         } catch (Exception e) {
           System.out.println(ExceptionUtils.getStackTrace(e));
         }
       });
+      System.out.println("queueSize" + baseThreadPool.getQueueSize());
+      System.out.println("end" + baseThreadPool.getAliveSize());
     }
+    try {
+      Thread.sleep(10000L);
+      System.out.println("=====================");
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    System.out.println("queueSizeend" + baseThreadPool.getQueueSize());
+    System.out.println("endend" + baseThreadPool.getAliveSize());
+    System.out.println("core" + baseThreadPool.getCoreSize());
   }
 }

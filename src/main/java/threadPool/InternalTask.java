@@ -34,7 +34,7 @@ public class InternalTask implements Runnable {
     }
   }
 
-  public void stop() {
+  void stop() {
     running = false;
   }
 }
