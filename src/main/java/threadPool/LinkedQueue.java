@@ -13,7 +13,7 @@ public class LinkedQueue implements Queue {
 
   private final DenyPolicy denyPolicy;
 
-
+  //其实可以用juc中的工具类直接替换掉的 算了 直接这样吧
   private final LinkedList<Runnable> runnableLinkedList = new LinkedList<>();
 
   LinkedQueue(int limit, DenyPolicy denyPolicy) {
