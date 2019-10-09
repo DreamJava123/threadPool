@@ -28,7 +28,7 @@ public class TomThreadPool implements BaseThreadPool {
 
   private final TimeUnit timeUnit;
   //用于维护
-  private LinkedBlockingQueue<InternalTask> aliveThreadQueue = new LinkedBlockingQueue<>();
+  private LinkedBlockingQueue<InternalThread> aliveThreadQueue = new LinkedBlockingQueue<>();
   // private final static DenyPolicy DENY_POLICY
 
   private final static ThreadFactory DEFAULT_THREAD_FACTORY = new DefaultThreadFactory();
@@ -96,9 +96,10 @@ public class TomThreadPool implements BaseThreadPool {
           System.out.println(ExceptionUtils.getStackTrace(e));
         }
         synchronized (this) {
+          //队列满了 增加线程
           if (baseThreadPool.queue.size() == baseThreadPool.maxNum && baseThreadPool.aliveNum < baseThreadPool.maxNum) {
             //说明满了 增加线程
-            for (int i = 0; i < baseThreadPool.maxNum - baseThreadPool.coreNum; i++) {
+            for (int i = 0; i < baseThreadPool.maxNum - baseThreadPool.aliveNum; i++) {
               baseThreadPool.creatThread();
             }
           }
@@ -124,17 +125,17 @@ public class TomThreadPool implements BaseThreadPool {
    * 内部创建线程方法
    */
   private void creatThread() {
-    InternalTask internalTask = new InternalTask(this.queue);
-    Thread thread = this.threadFactory.creatThread(internalTask);
-    aliveThreadQueue.offer(internalTask);
-    thread.start();
+    InternalThread internalThread = new InternalThread(this.queue);
+    Thread thread = this.threadFactory.creatThread(internalThread);
+    aliveThreadQueue.offer(internalThread);
     aliveNum++;
+    thread.start();
   }
 
   private void closeThread() {
-    InternalTask remove = aliveThreadQueue.remove();
-    remove.stop();
+    InternalThread remove = aliveThreadQueue.remove();
     aliveNum--;
+    remove.stop();
   }
 
   @Override

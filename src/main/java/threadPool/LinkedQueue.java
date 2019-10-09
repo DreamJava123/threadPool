@@ -47,9 +47,9 @@ public class LinkedQueue implements Queue {
           System.out.println(ExceptionUtils.getStackTrace(e));
         }
       }
+      //拿到第一个
+      return runnableLinkedList.removeFirst();
     }
-    //拿到第一个
-    return runnableLinkedList.removeFirst();
   }
 
   @Override

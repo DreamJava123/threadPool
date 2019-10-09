@@ -7,13 +7,13 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  * Created by TOM
  * On 2019/10/7 16:13
  */
-public class InternalTask implements Runnable {
+public class InternalThread implements Runnable {
 
   private final Queue queue;
 
   private volatile boolean running = true;
 
-  InternalTask(Queue queue) {
+  InternalThread(Queue queue) {
     this.queue = queue;
   }
 
